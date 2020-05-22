@@ -1,5 +1,8 @@
 const $imageUpload = document.getElementById('imageUpload')
 
+const $button = document.getElementById('hideButton')
+
+
 Promise.all([
   faceapi.nets.faceRecognitionNet.loadFromUri('./models'),
   faceapi.nets.faceLandmark68Net.loadFromUri('./models'),
@@ -32,20 +35,22 @@ async function start(){
     const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, .6)
 
     canvas = faceapi.createCanvasFromMedia(image)
+    addToggleEventCanvas(canvas);
+
     container.append(canvas)
     faceapi.matchDimensions(canvas, imageSize)
     
     const facesDetections = await faceapi.detectAllFaces(image).withFaceLandmarks().withFaceDescriptors()
     
     const resizedFacesDetections = faceapi.resizeResults(facesDetections, imageSize)
-    //console.log(resizedFacesDetections)
+    console.log(resizedFacesDetections)
     const results = resizedFacesDetections.map(face => faceMatcher.findBestMatch(face.descriptor))
     
     console.log(results)
     
     results.forEach( (result, i) => {
       const box = resizedFacesDetections[i].detection.box
-      const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString()})
+      const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString(), boxColor: '#0057ad' })
       drawBox.draw(canvas)
     })
   }
@@ -71,4 +76,14 @@ async function start(){
   }
   
   
+  function addToggleEventCanvas(canvas){
+    $button.classList.remove('hide')
+    $button.addEventListener( 'click' , () => {
+      if(canvas.classList.contains('hide')){
+        canvas.classList.remove('hide')
+      }else{
+        canvas.classList.add('hide')
+      }
+    })
+  }
 }
